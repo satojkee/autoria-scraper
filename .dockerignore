@@ -1,0 +1,11 @@
+.idea/
+.git/
+.venv/
+**/__pycache__/
+dumps/
+examples/
+
+.env*
+*~
+*.tmp
+*.http
