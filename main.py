@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Application `main.py` file.
 
 How to start?
