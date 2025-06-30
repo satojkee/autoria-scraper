@@ -47,7 +47,5 @@ def retry_on_failure(
                 # delay before each reattempt
                 await asyncio.sleep(delay)
 
-            logger.error('')
-
         return wrapper
     return decorator
