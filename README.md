@@ -97,8 +97,8 @@ CRON__SCRAPER="0 12 * * *"
 | `PG_HOST`                          | autoria-postgres                                                     | Database host (used by `autoria-postgres` and `pg_dump` util, use db container name: `autoria-postgres`)                                                                      |
 
 
-## Output data example in (10 rows)
-> Go to: `/examples/output_data_example.csv` for 100 row example
+## Output data example (10 rows)
+> Go to: `/examples/output_data_example.csv` for an example if 100 rows
 
 | id | url                                                                   | title                          | price_usd  | odometer | username          | phone_number | image_url                                                                              | images_count   | car_number   | car_vin               | datetime_found               |
 |----|-----------------------------------------------------------------------|--------------------------------|------------|----------|-------------------|--------------|----------------------------------------------------------------------------------------|----------------|--------------|-----------------------|------------------------------|
