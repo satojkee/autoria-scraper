@@ -15,7 +15,7 @@ __all__ = ('start',)
 
 
 logger = getLogger(__name__)
-# uses `Queue` to avoid blocking main thread with logs
+# use `Queue` to avoid blocking main thread with logs
 log_queue = Queue()
 
 stderr_handler = StreamHandler()
