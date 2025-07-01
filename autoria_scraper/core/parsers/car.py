@@ -5,13 +5,15 @@ import re
 from typing import Optional, Dict, Any
 
 from bs4 import Tag
-from pydantic import BaseModel, computed_field, Field
+from pydantic import computed_field, Field
+
+from ._base import BaseParser
 
 
 __all__ = ('CarParser',)
 
 
-class CarParser(BaseModel):
+class CarParser(BaseParser):
     """Attributes which start with `t_` are hidden in `.model_dump()`.
     Define data parsing logic here.
     """
@@ -25,9 +27,6 @@ class CarParser(BaseModel):
     t_images_count: "Tag" = Field(exclude=True)
     t_car_number: Optional["Tag"] = Field(default=None, exclude=True)
     t_car_vin: Optional["Tag"] = Field(default=None, exclude=True)
-
-    class Config:
-        arbitrary_types_allowed: bool = True
 
     @computed_field
     def url(self) -> str:
