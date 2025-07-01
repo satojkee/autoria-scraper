@@ -47,6 +47,8 @@ async def save_multiple(data: Collection["Base"]) -> None:
             session.add_all(data)
 
             await session.commit()
+            # `success` log-message with number of items saved
+            logger.info('transaction succeeded, items: [%s]', len(data))
         except Exception as e:
             logger.error('transaction failed, reason: %s', e)
 
