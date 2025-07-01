@@ -4,7 +4,7 @@
 
 ## Short structure description
 There are 2 main scrapers:
-- `autoria_scraper.core.scrapers.listing.ListingScraper` - this one is executed first and his goal is: **obtaining direct links to the listed cars**
+- `autoria_scraper.core.scrapers.listing.ListingScraper` - this one is executed first and its goal is: **obtaining direct links to the listed cars**
   - Returns a collection of links (approx. 350k);
   - Total execution time ~ 1-2 hours (based on hardware and settings).
 
@@ -14,7 +14,7 @@ There are 2 main scrapers:
 
 
 ## Cron jobs
-Cron jobs are managed by the linux package named `cron`. Define cron tasks in `/scripts/start.sh` script-file.
+Cron jobs are managed by the `cron` - linux package. Define cron jobs in `/scripts/start.sh` script-file.
 - `printenv` is used to apply project environment variables for cron jobs, otherwise those variables won't be accessible by cron. 
 - Define `CRON__SCRAPER` and `CRON__PG_DUMP` in the same `.env` file used by **docker-compose**.
 
@@ -71,7 +71,7 @@ PG_PASSWORD="postgres"
 PG_DB="autoria"
 PG_HOST="autoria-postgres"  # postgres container name or remote host
 
-# Cron schedule for pg_dump and scraper
+# Cron schedule settings
 # https://crontab.guru/
 CRON__PG_DUMP="0 12 * * *"
 CRON__SCRAPER="0 12 * * *"
@@ -98,7 +98,7 @@ CRON__SCRAPER="0 12 * * *"
 
 
 ## Output data example (10 rows)
-> Go to: `/examples/output_data_example.csv` for an example if 100 rows
+> Go to: `/examples/output_data_example.csv` for 100-row example
 
 | id | url                                                                   | title                          | price_usd  | odometer | username          | phone_number | image_url                                                                              | images_count   | car_number   | car_vin               | datetime_found               |
 |----|-----------------------------------------------------------------------|--------------------------------|------------|----------|-------------------|--------------|----------------------------------------------------------------------------------------|----------------|--------------|-----------------------|------------------------------|
