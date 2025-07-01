@@ -137,5 +137,4 @@ class ListingScraper(BaseScraper):
         )
         # AutoRia is lowkey a mess, so we have to filter out "newauto" links
         # being in the /used/ section doesn't make any sense here :c
-        # filtering manually
         return [_ for _ in self._direct_links if '/newauto/' not in _]
