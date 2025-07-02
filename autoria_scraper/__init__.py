@@ -61,8 +61,8 @@ async def start() -> None:
     )
     direct_links = await listing_scraper.start()
     # uses obtained links to configure `direct` scraper
-    # it returns a collection of `CarParser` instances.
-    # which can be easily converted to `Car` instances
+    # it returns a collection of `CarParser` instances,
+    #  which can be easily converted to `Car` instances
     direct_scraper = DirectScraper(
         phone_url=app_config.scraper.phone_url.__str__(),
         links=tuple(direct_links),
