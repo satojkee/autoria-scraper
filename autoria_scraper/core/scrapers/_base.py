@@ -3,8 +3,8 @@
 
 import asyncio
 from logging import getLogger
-from typing import Any, Callable, Tuple
 from abc import ABC, abstractmethod
+from typing import Any, Collection, Tuple, Coroutine
 
 
 __all__ = ('BaseScraper',)
@@ -12,6 +12,7 @@ __all__ = ('BaseScraper',)
 
 class BaseScraper(ABC):
     """Base class for all scrapers."""
+
     def __init__(self) -> None:
         self._logger = getLogger(__name__).getChild(self.__class__.__name__)
 
@@ -19,19 +20,16 @@ class BaseScraper(ABC):
     async def start(self) -> Any:
         """Entrypoint of each scraper."""
 
-    async def _process_range(
+    async def _concurrent_processing(
         self,
-        s: int,
-        e: int,
-        func: Callable
+        tasks: Collection[Coroutine]
     ) -> Tuple[Any]:
-        """Uses asyncio to spawn a list of tasks.
+        """Uses asyncio to process multiple tasks concurrently.
+        Wraps `asyncio.gather` function with additional logging.
 
-        :param s: int - first page index
-        :param e: int - last page index
-        :param func: Callable - function, that returns a list of `Coroutine`
+        :param tasks: Collection[Coroutine] - a collection of coroutines
         :return: Tuple[Any]
         """
-        self._logger.info('processing range: %d - %d', s, e)
-        # concurrently executes a list of tasks
-        return await asyncio.gather(*func(s, e))
+        self._logger.debug('spawning %d tasks', len(tasks))
+        # returns a tuple of results
+        return await asyncio.gather(*tasks)

@@ -174,10 +174,12 @@ class DirectScraper(BaseScraper):
         """
 
         def func_(s: int, e: int) -> List[Coroutine]:
-            """Function to use in `self._process_range` as `func` param.
+            """Returns a list of coroutines for concurrent processing.
 
-            :param s: int - start index
-            :param e: int - end index
+            Uses a subset of the `self._links` set, where from = s, to = e
+
+            :param s: int - from index
+            :param e: int - to index
             :return: list[Coroutine]
             """
             return [self.__extract_data(link) for link in self._links[s:e]]
@@ -187,10 +189,10 @@ class DirectScraper(BaseScraper):
                          len(self._links) + 1,
                          self._batch_size):
             # concurrent processing, tasks amount = batch_size
-            yield await self._process_range(s=from_, e=to_, func=func_)
+            yield await self._concurrent_processing(func_(from_, to_))
             # move to the next range of links, 0-10 -> 10:20
             from_ = to_
         # processing the last range (from_:last_index + 1)
-        yield await self._process_range(s=from_,
-                                        e=len(self._links),
-                                        func=func_)
+        yield await self._concurrent_processing(
+            func_(from_, len(self._links))
+        )

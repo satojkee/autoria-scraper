@@ -95,7 +95,7 @@ class ListingScraper(BaseScraper):
         """
 
         def func_(s: int, e: int) -> List[Coroutine]:
-            """Function to use in `self._process_range` as `func` param.
+            """Returns a list of coroutines for concurrent processing.
 
             :param s: int - start index
             :param e: int - end index
@@ -109,13 +109,13 @@ class ListingScraper(BaseScraper):
         from_ = 1
         for to_ in range(self._batch_size, total_pages + 1, self._batch_size):
             # concurrent processing, tasks amount = batch size
-            await self._process_range(s=from_, e=to_, func=func_)
+            await self._concurrent_processing(func_(from_, to_))
             # updates `previous` value, 0-10 -> 10-20 (step = batch size)
             from_ = to_
             # displays the current amount of extracted urls
             self._logger.debug('urls obtained: %d', len(self._direct_links))
         # similar to the last range (from_:total_pages + 1)
-        await self._process_range(s=from_, e=total_pages + 1, func=func_)
+        await self._concurrent_processing(func_(from_, total_pages + 1))
 
     async def start(self) -> List[str]:
         """This method starts the web-scraping process.
