@@ -4,13 +4,17 @@
 
 ## Short structure description
 There are 2 main scrapers:
-- `autoria_scraper.core.scrapers.listing.ListingScraper` - this one is executed first and its goal is: **obtaining direct links to the listed cars**
-  - Returns a collection of links (approx. 350k);
-  - Total execution time ~ 1-2 hours (based on hardware and settings).
+- `autoria_scraper.core.scrapers.catalog.CatalogScraper` - this scraper is responsible for extracting `direct` links from the catalog.
+  - Yields a collection of urls per stage.
+  - Stores every collected url in pool to avoid duplicates.
+  - Stage size is similar to `SCRAPER__BATCH_SIZE` value.
 
-- `autoria_scraper.core.scrapers.direct.DirectScraper` - this one waits for the `ListingScraper` to complete and then **obtains data from the direct links**
-  - Processes each link (approx. 350k links) obtained from the previous scraper;
-  - Total execution time ~ 10+ hours (based on hardware and settings).
+- `autoria_scraper.core.scrapers.direct.DirectScraper` - this one receives a collection of `direct` urls and extracts all necessary information from them.
+  - Processes each link given on init and yields a collection of parsed entities (collection may include `None` values)
+
+Links example:
+- direct - https://auto.ria.com/uk/auto_mercedes_benz_sprinter_38472224.html
+- catalog - https://auto.ria.com/uk/car/used/?page=30
 
 
 ## Cron jobs
@@ -52,7 +56,7 @@ Cron jobs are managed by the `cron` - linux package. Define cron jobs in `/scrip
 DATABASE__URL="postgresql+asyncpg://postgres:postgres@localhost:5432/autoria"
 # Use this one for testing purposes, ! remove in production !
 SCRAPER__PAGES_LIMIT="100"
-# Required for `autoria_scraper.core.scrapers.listing.ListingScraper` as root url to obtain listings
+# Required for `autoria_scraper.core.scrapers.catalog.CatalogScraper` as root url to obtain listings
 SCRAPER__ROOT_URL="https://auto.ria.com/uk/car/used/"
 # Required for `autoria_scraper.core.scrapers.direct.DirectScraper` as root url to collect sellers' phone numbers
 SCRAPER__PHONE_URL="https://auto.ria.com/bff/final-page/public/auto/popUp/"
@@ -83,7 +87,7 @@ CRON__SCRAPER="0 12 * * *"
 
 | Variable                           | Recommended value                                                    | Description                                                                                                                                                                   |
 |------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SCRAPER__PAGES_LIMIT`             | 100 - 500                                                            | **Use this option to test web-scraper.** Limits total amount of pages with a specified value for `ListingScraper` (approx. 18k+ pages for unlimited). `remove for production` |       
+| `SCRAPER__PAGES_LIMIT`             | 100 - 500                                                            | **Use this option to test web-scraper.** Limits total amount of pages with a specified value for `CatalogScraper` (approx. 18k+ pages for unlimited). `remove for production` |       
 | `SCRAPER__ROOT_URL`                | https://auto.ria.com/uk/car/used/                                    | `Constant!` Base url (crucial to obtain direct links to the listed cars)                                                                                                      |
 | `SCRAPER__PHONE_URL`               | https://auto.ria.com/bff/final-page/public/auto/popUp/               | `Constant!` This one is used to dynamically obtain phone numbers                                                                                                              |
 | `SCRAPER__BATCH_SIZE`              | 200                                                                  | Amount of concurrent tasks (the higher this value is, the more network/RAM is consumed).                                                                                      |
