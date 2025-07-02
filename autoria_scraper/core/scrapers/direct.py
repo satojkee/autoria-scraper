@@ -42,7 +42,7 @@ class DirectScraper(BaseScraper):
         self._links = links
         self._batch_size = batch_size
 
-    async def __extract_data(self, url: str) -> "CarParser":
+    async def __extract_data(self, url: str) -> Optional["CarParser"]:
         """This method extract all necessary data from the given url.
 
         Collects:
@@ -57,7 +57,7 @@ class DirectScraper(BaseScraper):
             - phone number
 
         :param url: str - direct link to the car
-        :return: CarParser - parsed data instance
+        :return: Optional["CarParser"] - parsed instance or None
         """
 
         async def _obtain_phone_number(
