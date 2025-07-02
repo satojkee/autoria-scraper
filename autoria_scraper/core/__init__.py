@@ -1,1 +1,1 @@
-"""This package contains web-scaper and its components."""
+"""This package contains web-scrapers and their components."""
