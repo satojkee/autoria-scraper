@@ -1,12 +1,11 @@
-"""This module contains `DirectScraper` class.
-
-This one is used for data extraction from direct links.
-"""
+"""This module contains `DirectScraper` class."""
 
 
+from logging import getLogger
 from typing import (
     Any,
     Collection,
+    Tuple,
     Coroutine,
     Dict,
     Optional,
@@ -14,7 +13,11 @@ from typing import (
     AsyncGenerator
 )
 
-from autoria_scraper.core.misc import fetch_soup, post
+from autoria_scraper.core.misc import (
+    fetch_soup,
+    post,
+    chunked_range_processing
+)
 from autoria_scraper.core.selectors import CarSelectors
 from autoria_scraper.core.scrapers._base import BaseScraper
 from autoria_scraper.core.parsers import CarParser, PhoneNumberParser
@@ -23,7 +26,14 @@ from autoria_scraper.core.parsers import CarParser, PhoneNumberParser
 __all__ = ('DirectScraper',)
 
 
+logger = getLogger(__name__)
+
+
 class DirectScraper(BaseScraper):
+    """This scaper is used for data extraction from the pool of given links.
+    1 url = 1 parsed entity/None
+    """
+
     def __init__(
         self,
         phone_url: str,
@@ -42,6 +52,43 @@ class DirectScraper(BaseScraper):
         self._links = links
         self._batch_size = batch_size
 
+    async def __obtain_phone_number(
+        self,
+        pnp: "PhoneNumberParser"
+    ) -> Optional[Dict[str, Any]]:
+        """Makes some manipulations to obtain seller's phone number.
+        In order to obtain seller phone number, we have to make a POST
+        request on https://auto.ria.com/bff/final-page/public/auto/popUp/
+
+        **Request body example**
+
+        ```json
+        {
+          "autoId": 38330999,
+          "blockId": "autoPhone",
+          "data": [
+            ["userId", "4745906"],
+            ["phoneId", "682365827"]
+          ]
+        }
+        ```
+
+        :param pnp: PhoneNumberParser - parsed pieces of phone number
+        :return: Optional[Dict[str, Any]] - json response to parse
+        """
+        return await post(
+            url=self._phone_url,
+            json={
+                'autoId': pnp.auto_id,
+                'blockId': 'autoPhone',
+                'data': [
+                    ['userId', pnp.user_id],
+                    ['phoneId', pnp.phone_id]
+                ]
+            },
+            headers={'Content-Type': 'application/json'}
+        )
+
     async def __extract_data(self, url: str) -> Optional["CarParser"]:
         """This method extract all necessary data from the given url.
 
@@ -59,43 +106,6 @@ class DirectScraper(BaseScraper):
         :param url: str - direct link to the car
         :return: Optional["CarParser"] - parsed instance or None
         """
-
-        async def _obtain_phone_number(
-            pnp: "PhoneNumberParser"
-        ) -> Optional[Dict[str, Any]]:
-            """Makes some manipulations to obtain seller's phone number.
-            In order to obtain seller phone number, we have to make a POST
-            request on https://auto.ria.com/bff/final-page/public/auto/popUp/
-
-            **Request body example**
-
-            ```json
-            {
-              "autoId": 38330999,
-              "blockId": "autoPhone",
-              "data": [
-                ["userId", "4745906"],
-                ["phoneId", "682365827"]
-              ]
-            }
-            ```
-
-            :param pnp: PhoneNumberParser - parsed pieces of phone number
-            :return: Optional[Dict[str, Any]] - json response to parse
-            """
-            return await post(
-                url=self._phone_url,
-                json={
-                    'autoId': pnp.auto_id,
-                    'blockId': 'autoPhone',
-                    'data': [
-                        ['userId', pnp.user_id],
-                        ['phoneId', pnp.phone_id]
-                    ]
-                },
-                headers={'Content-Type': 'application/json'}
-            )
-
         response = await fetch_soup(url)
         # first of all, we've to check the availability of the car
         # in some cases, car's page is accessible, but still not listed
@@ -129,7 +139,7 @@ class DirectScraper(BaseScraper):
                 [0]
                 .find(**CarSelectors.images_count)
             )
-            phone_number = await _obtain_phone_number(
+            phone_number = await self.__obtain_phone_number(
                 PhoneNumberParser(
                     t_auto_id=auto_id,
                     t_phone_id=phone_id,
@@ -151,26 +161,28 @@ class DirectScraper(BaseScraper):
                 t_images_count=images_count,
                 t_phone_number=phone_number
             )
-
-            self._logger.info('received: %s', parsed_entity.model_dump())
+            # displays parsed entity in json format
+            logger.info('extracted: %s', parsed_entity.model_dump())
 
             return parsed_entity
         else:
-            self._logger.info('data unavailable, skipping: %s', url)
+            logger.info('data unavailable, skipping: %s', url)
 
     async def start(
         self
-    ) -> AsyncGenerator[Collection[Optional["CarParser"]], None]:
+    ) -> AsyncGenerator[Tuple[Optional["CarParser"]], None]:
         """This method starts the web-scraping process.
 
         **Usage example**
+
         ```python
         scraper = DirectScraper(...)
 
         async for chunk in scraper.start():
-            print(chunk) # Collection[Optional["CarParser"]]
+            print(chunk) # Tuple[Optional["CarParser"]]
         ```
-        :return: AsyncGenerator[Collection[Optional["CarParser"]], None]
+
+        :return: AsyncGenerator[Tuple[Optional["CarParser"]], None]
         """
 
         def func_(s: int, e: int) -> List[Coroutine]:
@@ -180,19 +192,16 @@ class DirectScraper(BaseScraper):
 
             :param s: int - from index
             :param e: int - to index
-            :return: list[Coroutine]
+            :return: List[Coroutine]
             """
             return [self.__extract_data(link) for link in self._links[s:e]]
 
-        from_ = 0
-        for to_ in range(self._batch_size,
-                         len(self._links) + 1,
-                         self._batch_size):
-            # concurrent processing, tasks amount = batch_size
-            yield await self._concurrent_processing(func_(from_, to_))
-            # move to the next range of links, 0-10 -> 10:20
-            from_ = to_
-        # processing the last range (from_:last_index + 1)
-        yield await self._concurrent_processing(
-            func_(from_, len(self._links))
-        )
+        logger.info('pages to crawl: %d', len(self._links))
+
+        async for chunk in chunked_range_processing(
+            func=func_,
+            from_=0,
+            to_=len(self._links) + 1,
+            batch=self._batch_size
+        ):
+            yield chunk
