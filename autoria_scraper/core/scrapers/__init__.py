@@ -1,8 +1,21 @@
 """This package contains web-scrapers.
 
-Paged scraper:
+Catalog scraper:
     This one is used for obtaining "direct" links to the listed cars.
     Then, we can use these links to set up `Direct` scraper.
+
+    **Usage example**
+
+    ```python
+    catalog_scraper = CatalogScraper(
+        root_url=...,
+        batch_size=...,
+        **kwargs
+    )
+
+    async for urls in catalog_scraper.start():
+        print(urls) # Tuple[str]
+    ```
 
 Direct scraper:
     Extracts necessary information from each "direct" link (1 link = 1 car).
@@ -19,10 +32,10 @@ Direct scraper:
     )
 
     async for chunk in direct_scraper.start():
-        print(chunk) # Collection[Optional["CarParser"]]
+        print(chunk) # Tuple[Optional["CarParser"]]
     ```
 """
 
 
 from .direct import DirectScraper
-from .listing import ListingScraper
+from .catalog import CatalogScraper
