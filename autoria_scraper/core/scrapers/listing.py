@@ -9,7 +9,7 @@ Examples:
 """
 
 
-from typing import Coroutine, Optional
+from typing import Coroutine, Optional, List
 
 from autoria_scraper.core.selectors import (
     ListedSelectors,
@@ -94,7 +94,7 @@ class ListingScraper(BaseScraper):
         :return: None
         """
 
-        def func_(s: int, e: int) -> list[Coroutine]:
+        def func_(s: int, e: int) -> List[Coroutine]:
             """Function to use in `self._process_range` as `func` param.
 
             :param s: int - start index
@@ -117,7 +117,7 @@ class ListingScraper(BaseScraper):
         # similar to the last range (from_:total_pages + 1)
         await self._process_range(s=from_, e=total_pages + 1, func=func_)
 
-    async def start(self) -> list:
+    async def start(self) -> List[str]:
         """This method starts the web-scraping process.
 
         Obtains the total amount of pages and processes them concurrently.
