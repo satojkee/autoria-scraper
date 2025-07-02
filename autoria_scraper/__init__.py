@@ -39,42 +39,42 @@ listener = QueueListener(log_queue, stderr_handler)
 
 async def start() -> None:
     """Entrypoint function.
-    Checks database connection and starts scraping.
+
+    1. Enables queue listener for logging
+    2. Checks database connection and creates necessary tables
+    3. Starts crawling
 
     :return: None
     """
-    # enables listener for logging
     listener.start()
 
     from autoria_scraper.db.models import Car
     from autoria_scraper.db import init_db, save_multiple
     from autoria_scraper.config import app_config
-    from autoria_scraper.core.scrapers import ListingScraper, DirectScraper
+    from autoria_scraper.core.scrapers import CatalogScraper, DirectScraper
 
     # checks database connection and creates necessary tables if those missing
     await init_db()
     # processes pages with listings to obtain `direct` links
-    listing_scraper = ListingScraper(
+    catalog_scraper = CatalogScraper(
         root_url=app_config.scraper.root_url.__str__(),
         batch_size=app_config.scraper.batch_size,
         pages_limit=app_config.scraper.pages_limit
     )
-    direct_links = await listing_scraper.start()
-    # uses obtained links to configure `direct` scraper
-    # it returns a collection of `CarParser` instances,
-    #  which can be easily converted to `Car` instances
-    direct_scraper = DirectScraper(
-        phone_url=app_config.scraper.phone_url.__str__(),
-        links=tuple(direct_links),
-        batch_size=app_config.scraper.batch_size
-    )
-    async for data in direct_scraper.start():
-        # saves data to the db
-        await save_multiple([
-            Car(**instance.model_dump())
-            for instance in data
-            if instance is not None
-        ])
+    async for urls in catalog_scraper.start():
+        # using obtained collection of urls to set up `direct` scraper
+        direct_scraper = DirectScraper(
+            phone_url=app_config.scraper.phone_url.__str__(),
+            links=urls,
+            batch_size=app_config.scraper.batch_size
+        )
+        async for chunk in direct_scraper.start():
+            # each `chunk` is a collection of `CarParser` instances
+            #  which can be easily converted to `Car` instances
+            await save_multiple([
+                Car(**instance.model_dump())
+                for instance in chunk
+                if instance is not None
+            ])
 
-    # stops `QueueListener`
     listener.stop()
