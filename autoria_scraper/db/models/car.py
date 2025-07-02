@@ -7,7 +7,7 @@ from datetime import datetime
 from sqlalchemy import DateTime
 from sqlalchemy.orm import mapped_column, Mapped
 
-from ._base import Base
+from autoria_scraper.db.models._base import Base
 
 
 __all__ = ('Car',)

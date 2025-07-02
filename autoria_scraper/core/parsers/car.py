@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 from bs4 import Tag
 from pydantic import computed_field, Field
 
-from ._base import BaseParser
+from autoria_scraper.core.parsers._base import BaseParser
 
 
 __all__ = ('CarParser',)
