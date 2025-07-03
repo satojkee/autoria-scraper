@@ -34,13 +34,13 @@ class Scraper(BaseModel):
     root_url: HttpUrl
     phone_url: HttpUrl
     batch_size: int
-    aiohttp: AioHttp
     pages_limit: Optional[int] = None
 
 
 class Settings(BaseSettings):
     database: Database
     scraper: Scraper
+    aiohttp: AioHttp
 
     model_config = SettingsConfigDict(
         env_file=('.env.local', '.env'),

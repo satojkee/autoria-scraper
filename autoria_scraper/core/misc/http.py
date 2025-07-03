@@ -17,13 +17,13 @@ __all__ = ('fetch_soup', 'post')
 
 
 # delay after each reattempt in `_aiohttp_session` (on failure)
-_REATTEMPT_DELAY: float = app_config.scraper.aiohttp.attempt_delay
+_REATTEMPT_DELAY: float = app_config.aiohttp.attempt_delay
 # number of reattempts for each request (on failure)
-_REATTEMPTS_LIMIT: int = app_config.scraper.aiohttp.attempts_limit
+_REATTEMPTS_LIMIT: int = app_config.aiohttp.attempts_limit
 # if a request exceeds that value, a `TimeoutError` will be raised
 # default value provided by aiohttp is 60 * 5 = 300sec
 # usually, it's faster to make a new request, than wait 5 minutes...
-_timeout = ClientTimeout(total=app_config.scraper.aiohttp.timeout)
+_timeout = ClientTimeout(total=app_config.aiohttp.timeout)
 # using `fake-useragent` package to rotate user-agents
 _ua = UserAgent()
 
