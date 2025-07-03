@@ -23,7 +23,7 @@ class Database(BaseModel):
 
 
 class AioHttp(BaseModel):
-    """Contains `scraper.util.aiohttp_session` settings."""
+    """Contains aiohttp settings."""
     attempts_limit: int
     attempt_delay: float
     timeout: int
