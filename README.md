@@ -63,11 +63,11 @@ SCRAPER__PHONE_URL="https://auto.ria.com/bff/final-page/public/auto/popUp/"
 # Required for both scrapers, defines an amount of concurrent tasks (the higher this values is, the more network/RAM application consumes)
 SCRAPER__BATCH_SIZE="200"
 # Replaces `aiohttp` default request timeout value (300 -> 60), throws `TimeoutError` if exceeded
-SCRAPER__AIOHTTP__TIMEOUT="60"
+AIOHTTP__TIMEOUT="60"
 # Retries amount for each `aiohttp` request (om failure)
-SCRAPER__AIOHTTP__ATTEMPTS_LIMIT="3"
+AIOHTTP__ATTEMPTS_LIMIT="3"
 # Delay between each `aiohttp` request reattempt (on failure, in seconds)
-SCRAPER__AIOHTTP__ATTEMPT_DELAY="2"
+AIOHTTP__ATTEMPT_DELAY="2"
 
 # Required for `autoria-postgres` and `pg_dump` cron task
 PG_USER="postgres"
@@ -85,20 +85,20 @@ CRON__SCRAPER="0 12 * * *"
 > Project uses `pydantic_settings` package to manage configuration. \
 > `__` is used as nesting delimiter.
 
-| Variable                           | Recommended value                                                    | Description                                                                                                                                                                   |
-|------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SCRAPER__PAGES_LIMIT`             | 100 - 500                                                            | **Use this option to test web-scraper.** Limits total amount of pages with a specified value for `CatalogScraper` (approx. 18k+ pages for unlimited). `remove for production` |       
-| `SCRAPER__ROOT_URL`                | https://auto.ria.com/uk/car/used/                                    | `Constant!` Base url (crucial to obtain direct links to the listed cars)                                                                                                      |
-| `SCRAPER__PHONE_URL`               | https://auto.ria.com/bff/final-page/public/auto/popUp/               | `Constant!` This one is used to dynamically obtain phone numbers                                                                                                              |
-| `SCRAPER__BATCH_SIZE`              | 200                                                                  | Amount of concurrent tasks (the higher this value is, the more network/RAM is consumed).                                                                                      |
-| `SCRAPER__AIOHTTP__ATTEMPTS_LIMIT` | 3                                                                    | Number of reattempts for `aiohttp` requests                                                                                                                                   |
-| `SCRAPER__AIOHTTP__TIMEOUT`        | 60                                                                   | Timeout for `aiohttp` requests (in seconds), default value provided by `aiohttp` = 60 * 5 = 300                                                                               |
-| `SCRAPER__AIOHTTP__ATTEMPT_DELAY`  | 2                                                                    | Delay between each reattempt (in seconds)                                                                                                                                     |
-| `DATABASE__URL`                    | postgresql+asyncpg://postgres:postgres@autoria-postgres:5432/autoria | Database url, `postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{host/container_name)}:5432/{PG_DB}`                                                                              |
-| `PG_USER`                          | postgres                                                             | Database username (used by `autoria-postgres` and `pg_dump` util)                                                                                                             |
-| `PG_PASSWORD`                      | postgres                                                             | Database password (used by `autoria-postgres` and `pg_dump` util)                                                                                                             |
-| `PG_DB`                            | autoria                                                              | Database name (used by `autoria-postgres` and `pg_dump` util)                                                                                                                 |
-| `PG_HOST`                          | autoria-postgres                                                     | Database host (used by `autoria-postgres` and `pg_dump` util, use db container name: `autoria-postgres`)                                                                      |
+| Variable                    | Recommended value                                                    | Description                                                                                                                                                                   |
+|-----------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `SCRAPER__PAGES_LIMIT`      | 100 - 500                                                            | **Use this option to test web-scraper.** Limits total amount of pages with a specified value for `CatalogScraper` (approx. 18k+ pages for unlimited). `remove for production` |       
+| `SCRAPER__ROOT_URL`         | https://auto.ria.com/uk/car/used/                                    | `Constant!` Base url (crucial to obtain direct links to the listed cars)                                                                                                      |
+| `SCRAPER__PHONE_URL`        | https://auto.ria.com/bff/final-page/public/auto/popUp/               | `Constant!` This one is used to dynamically obtain phone numbers                                                                                                              |
+| `SCRAPER__BATCH_SIZE`       | 200                                                                  | Amount of concurrent tasks (the higher this value is, the more network/RAM is consumed).                                                                                      |
+| `AIOHTTP__ATTEMPTS_LIMIT`   | 3                                                                    | Number of reattempts for `aiohttp` requests                                                                                                                                   |
+| `AIOHTTP__TIMEOUT`          | 60                                                                   | Timeout for `aiohttp` requests (in seconds), default value provided by `aiohttp` = 60 * 5 = 300                                                                               |
+| `AIOHTTP__ATTEMPT_DELAY`    | 2                                                                    | Delay between each reattempt (in seconds)                                                                                                                                     |
+| `DATABASE__URL`             | postgresql+asyncpg://postgres:postgres@autoria-postgres:5432/autoria | Database url, `postgresql+asyncpg://{PG_USER}:{PG_PASSWORD}@{host/container_name)}:5432/{PG_DB}`                                                                              |
+| `PG_USER`                   | postgres                                                             | Database username (used by `autoria-postgres` and `pg_dump` util)                                                                                                             |
+| `PG_PASSWORD`               | postgres                                                             | Database password (used by `autoria-postgres` and `pg_dump` util)                                                                                                             |
+| `PG_DB`                     | autoria                                                              | Database name (used by `autoria-postgres` and `pg_dump` util)                                                                                                                 |
+| `PG_HOST`                   | autoria-postgres                                                     | Database host (used by `autoria-postgres` and `pg_dump` util, use db container name: `autoria-postgres`)                                                                      |
 
 
 ## Output data example (10 rows)
